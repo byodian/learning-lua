@@ -59,3 +59,51 @@ repeat
 	print("the way of the future")
 	num = num - 1
 until num == 0
+
+-----------------------------------------------
+-- 2. Functions
+-----------------------------------------------
+
+function fib(n)
+	if n < 2 then return 1 end
+	return fib(n - 2) + fib(n - 1)
+end
+
+-- Closures and anonymous functions are ok:
+function adder(x)
+	return function(y) return x + y end
+end
+
+a1 = adder(9)
+a2 = adder(36)
+
+print(a1(16))
+print(a2(64))
+
+-- Returns, func calls, and assignments all work
+-- with lists that may be mismatched in length.
+-- Unmatched receivers are nil;
+-- unmatched senders are discarded.
+
+function bar(a, b, c)
+	print(a, b, c)
+	return 4, 8, 15, 16, 23, 42
+end
+
+x, y = bar('zaphod') --> prints "zaphod nil nil"
+-- Now x = 4, y = 8, values 15...42 are discarded
+
+-- Functionsa are first-class, may be local/global.
+-- These are the same:
+
+function f(x) return x * x end
+f = function(x) return x * x end
+
+-- And so are these:
+local function g(x) return math.sin(x) end
+local g;
+g = function (x) return math.sin(x) end
+-- the 'local g' decl makes g-self-references ok.
+
+-- Calls with one string param don't need parens;
+print 'hello' -- Works fine.
