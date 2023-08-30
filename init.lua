@@ -232,3 +232,60 @@ print('eatenBy: ' .. eatenBy)
 -- __index(a, b)  <fn or a table>  for a.b
 -- __newindex(a, b, c)             for a.b = c
 -- __call(a, ...)                  for a(...)
+
+-----------------------------------------------------
+-- 3.2 Class-like tables and inheritance.
+-----------------------------------------------------
+
+Dog = {} -- Dog acts like a class; it's really a table.
+
+-- function tablename:fn(...) is the same as function tablename.fn(self, ...)
+-- The : just adds a first arg called self.
+function Dog:new()
+	-- newObject will be an instance of class Dog.
+	newObject = { sound = 'woof' }
+	-- self = the class being instantiated. Often 
+	-- self = Dog, but inheritance can change it
+	-- newObject gets self's functions when we set both
+	-- newObject's metatable and self's __index to self.
+	self.__index = self
+	return setmetatable(newObject, self)
+end
+
+function Dog:makeSound()
+	print('I say ' .. self.sound)
+end
+
+-- Same as Dog.new(Dog), so self = Dog in new()
+mrDog = Dog:new()
+mrDog:makeSound() -- 'I say woof' -- Same as mrDog.makeSound(mrDog); self = mrDog.
+
+mrDog.sound = 'mewo'
+mrDog:makeSound() -- 'I say mewo'
+
+------------ Inheritance example --------------
+-- 1. LoudDog gets Dog's methods and variables.
+-- 2. self has a 'sound' key from new()
+-- 3. Same as LoundDog.new(LoudDog), and converted to 
+--    Dog.new(LoudDog) as LoudDog has no 'new' key,
+--    but does have __index = Dog on its metatable.
+--    Result: seymour's metatable is LoundDog, and LoudDog.__index = LoudDog.
+--    So seymour.key will = seymour.key, LoudDog.key, Dog.key, whichever table
+--    is the first with the given key.
+-- 4. The 'makeSound' key is found in LoudDog; this is the same as LoudDog.makeSound(seymour)
+
+-- Same as Dog.new(Dog), Dog.__index = Dog 
+LoudDog = Dog:new()		 -- 1. setmetatable({ sound = 'woof' }, Dog)
+LoudDog.sound = 'mewo'
+function LoudDog:makeSound()
+	s = self.sound .. ' '	 -- 2.
+	print(s .. s .. s)
+end
+
+for key, val in pairs(LoudDog) do
+	print(123, key, val)
+end
+
+-- Same as LoudDog.new(LoudDog) -> Dog.new(LoudDog)
+seymour = LoudDog:new() 		-- 3. setmetatable({ sound: 'woof' }, LoudDog)
+seymour:makeSound() -- 'woof woof woof' -- 4.
